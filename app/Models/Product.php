@@ -14,19 +14,11 @@ class Product extends Model
     	return $this->belongsTo(Category::class);
     }
 
- //    public function getFeaturedImageAttribute($value)
- //    {
- //        $baseUrl = url('/'); 
- //        return $baseUrl . '/' . $value;
- //    }
 
-
- //    public function setFeaturedImageAttribute($value)
-	// {
-	//     $filename = basename($value);
-	//     $this->attributes['featured_image'] = $filename;
-	// }
-
-
+     
+      public function purchasecarts()
+      {
+      	  return $this->hasMany(Purchasecart::class);
+      }
 	
 }

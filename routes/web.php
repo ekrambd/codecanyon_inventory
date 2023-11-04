@@ -6,9 +6,11 @@ use App\Http\Controllers\AccessController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\SubcategoryController;
+use App\Http\Controllers\WarehouseController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\AjaxController;
 /*
 |--------------------------------------------------------------------------
@@ -40,6 +42,9 @@ Route::group(['middleware' => 'prevent-back-history'],function(){
     //subcategories
     Route::resource('subcategories', SubcategoryController::class);
 
+    //warehouses
+    Route::resource('warehouses', WarehouseController::class);
+
     //products
     Route::resource('products', ProductController::class);
 
@@ -49,9 +54,19 @@ Route::group(['middleware' => 'prevent-back-history'],function(){
     //customers
     Route::resource('customers', CustomerController::class);
 
+    //product purchase
+
+    Route::get('/purchase-product', [PurchaseController::class, 'purchaseProduct']);
+
+
+
 });
 
 
 //ajax requests
 Route::get('/all-categories', [AjaxController::class, 'allCategories']);
 Route::post('get-subcategories', [AjaxController::class, 'getSubcategories']);
+Route::post('scan-purchase-product', [AjaxController::class, 'scanPurchaseProduct']); 
+Route::get('/product-purchase/{id}', [AjaxController::class, 'productPurchase']);
+Route::get('/delete-purchase-cart/{id}', [AjaxController::class, 'deletePurchaseCart']); 
+Route::get('/get-suppliers', [AjaxController::class, 'getSuppliers']);

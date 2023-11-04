@@ -13,10 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('subcategories', function (Blueprint $table) {
+        Schema::create('purchases', function (Blueprint $table) {
             $table->id();
-            $table->integer('category_id');
-            $table->string('subcategory_name')->unique();
+            $table->integer('invoice_number')->unique();
+            $table->integer('supplier_id');
+            $table->float('total_amount', 10, 2);
+            $table->float('paid_amount', 10, 2);
+            $table->float('due_amount', 10, 2);
             $table->timestamps();
         });
     }
@@ -28,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('subcategories');
+        Schema::dropIfExists('purchases');
     }
 };

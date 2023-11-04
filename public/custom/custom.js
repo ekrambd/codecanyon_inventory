@@ -27,6 +27,9 @@ $(document).ready(function(){
         focus: true
       }
     );
+   
+   purchaseSubtotal();
+   
 
     var base_url = localStorage.getItem('base_url');
 
@@ -149,6 +152,27 @@ $(document).ready(function(){
     });
 
 
+   var warehouseTable = $('#warehouse-table').DataTable({
+        searching: true,
+        processing: true,
+        serverSide: true,
+        ordering: false,
+        responsive: true,
+        stateSave: true,
+        ajax: {
+          url: base_url+"/warehouses",
+        },
+
+        columns: [
+            {data: 'warehouse_name', name: 'warehouse_name'},
+            {data: 'warehouse_phone', name: 'warehouse_phone'},
+            {data: 'warehouse_email', name: 'warehouse_email'},
+            {data: 'action', name: 'action', orderable: false, searchable: false},
+        ]
+    });
+
+
+
 
     $(document).on('click', '.delete-category', function(e){
     	e.preventDefault();
@@ -192,6 +216,28 @@ $(document).ready(function(){
               });
         }
     });
+
+      $(document).on('click', '.delete-warehouse', function(e){
+      e.preventDefault();
+      var int_warehouse_id = $(this).data('id');
+        if(confirm('Do you want to delete this?'))
+        {
+            ajax_url = base_url+"/warehouses/"+int_warehouse_id;
+           $.ajax({
+
+                   url: ajax_url,
+                   type:"DELETE",
+                   dataType:"json",
+                   success:function(data) {
+                      $('.data-table').DataTable().ajax.reload(null, false);
+                      toastr.success(data);
+
+                   },
+                          
+              });
+        }
+    });
+
 
 
     $(document).on('click', '.add-new-subcategory', function(e){
@@ -445,5 +491,314 @@ $(document).ready(function(){
         }
     });
 
+   //purchase product ajax
+
+   $(document).keypress(".scan-purchase-product",function(event){
+            if (event.which == '10' || event.which == '13') {
+                event.preventDefault();
+            }
+        });
+ 
+ var delay = (function() {
+            var timer = 0;
+            return function(callback, ms) {
+                clearTimeout (timer);
+                timer = setTimeout(callback, ms);
+            };
+        })();
+
+
+    $(document).on('input', '.scan-purchase-product', function(){
+        var scan_purchase_product = $(this).val();
+        if(scan_purchase_product == '')
+        {
+            $('.get-product-lists').html('');
+        }
+        else
+        {
+            if($.isNumeric(scan_purchase_product))
+            {
+               delay(function() { scanPurchaseProduct(base_url,scan_purchase_product); }, 200);
+            }
+            else
+            {
+                 scanPurchaseProduct(base_url,scan_purchase_product);
+            }
+        }
+        
+        
+    });
+
+    $(document).on('click', '.select-product', function(e){
+       e.preventDefault();
+      $('.no-data').css('display','none');
+       var int_pro_id = $(this).data('id');
+       $.ajax({
+
+                   url: base_url+"/product-purchase/"+int_pro_id,
+                   type:"GET",
+                   dataType:"json",
+                   success:function(response) { 
+
+                    $('#purchase-conts').html('');
+
+
+                     $(response.data).each(function(idx,val){
+                        var imgUrl =  val.product.featured_image;
+                         var table = '<tr id="purchase_cart_'+val.id+'" class="purchase-carts">'+
+                                       '<td width="15"><img class="img-fluid featured-image" src="'+base_url+"/"+val.product.featured_image+'"></td>'+
+                                       '<td width="15">'+val.product.product_name+'</td>'+
+                                       '<td width="10" class="purchase-pro-price purchase_pro_price_'+val.id+'">'+val.product.purchase_price+'</td>'+
+                                       '<td width="10"><input type="number" class="form-control my-cart-qty cart_qty_'+val.id+'" name="cart_qty[]" value="'+val.cart_qty+'" data-id="'+val.id+'"></td>'+
+                                       '<td width="10"><input type="number" name="purchase_product_tax[]" class="form-control product_purchase_tax purchase_product_tax_'+val.id+'" min="0" value="0" data-id="'+val.id+'"></td>'+
+                                       '<td width="15" class="purchase-sub-total purchase_subtotal_'+val.id+'">'+val.product.purchase_price * val.cart_qty+'</td>'+ 
+                                       '<td width="15"><a href="#" class="btn btn-danger btn-sm delete-purchase-cart" data-id="'+val.id+'"><i class="fa fa-trash"></i></a></td>'+
+                                    '</tr>';
+                          $('#purchase-conts').append(table);
+
+                          $('.scan-purchase-product').val('');
+
+                          $('.get-product-lists').html('');
+
+                          $('.scan-purchase-product').focus();
+
+                          purchaseSubtotal();
+                     });
+
+                      
+
+                    
+                   },
+                          
+        });
+    });
+
+    $(document).on('input', '.product_purchase_tax', function(){
+       var get_pro_id = $(this).data('id');
+       var get_tax_val = parseFloat($(this).val());
+       var get_cart_qty = parseFloat($('.cart_qty_'+get_pro_id).val());
+  
+       if($(this).val() == '')
+       {
+          $('.purchase_subtotal_'+get_pro_id).text(0);
+          purchaseSubtotal();
+          return false;
+       }
+       var get_pro_price = parseFloat($('.purchase_pro_price_'+get_pro_id).text() * get_cart_qty);
+       var get_pro_percentage = (get_tax_val / 100) * get_pro_price;
+       var get_pro_total = get_pro_price+get_pro_percentage;
+       $('.purchase_subtotal_'+get_pro_id).text(get_pro_total.toFixed(2));
+       purchaseSubtotal();
+    });
+
+    $(document).on('input', '.my-cart-qty', function(){
+       var qty_pro_id = $(this).data('id');
+       var qty_pro_tax = parseFloat($('.purchase_product_tax_'+qty_pro_id).val());
+       var qty_pro_val = parseFloat($(this).val());
+       if($(this).val() == '')
+       {
+           $('.purchase_subtotal_'+qty_pro_id).text(0);
+           purchaseSubtotal();
+           return false;
+       }
+       var qty_pro_price = parseFloat($('.purchase_pro_price_'+qty_pro_id).text());
+       var qty_pro_total = qty_pro_price*qty_pro_val + (qty_pro_tax/100)*qty_pro_price;
+       $('.purchase_subtotal_'+qty_pro_id).text(qty_pro_total.toFixed(2));
+       purchaseSubtotal();
+    });
+
+    $(document).on('input', '.purchase-discount', function(){
+        purchaseSubtotal();
+    });
+
+
+    $(document).on('input', '.purchase-pay', function(){
+        var purchase_subtotal = $('.purchase-total').val();
+        var purchase_pay = $(this).val();
+        if(purchase_pay != '')
+        {
+            var purchase_due = $('.purchase-due').val();
+            var purchase_total_result = parseFloat(purchase_subtotal) - parseFloat(purchase_pay);
+            $('.purchase-due').val(purchase_total_result.toFixed(2));
+        }
+        
+    });
+
+    $(document).on('click', '.delete-purchase-cart', function(e){
+       e.preventDefault();
+       var purchase_cart_len = $('.purchase-carts').each(function(){}).length;
+       
+       if(confirm('Do you want to delete this?'))
+       {  
+
+         if(purchase_cart_len == 1)
+         {   
+
+             var noData = '<td class="no-data" colspan="7"><h4>No data found</h4></td>';
+
+             $('#purchase-conts').html(noData);
+         }
+          var int_purchase_id = $(this).data('id');
+       
+          $.ajax({
+
+                   url: base_url+"/delete-purchase-cart/"+int_purchase_id,
+                   type:"GET",
+                   dataType:"json",
+                   success:function(response) {
+
+                      console.log(response);
+
+                      toastr.success(response.message);
+
+                      
+                       $('#purchase_cart_'+int_purchase_id).remove();
+
+                       purchaseSubtotal();
+
+                       $('.scan-purchase-product').focus();
+                      
+                   },
+                          
+        });
+
+         
+       }
+       
+    });
+
+
+    
+    $('#addSupplier').submit(function(e){
+       e.preventDefault();
+       var formData = new FormData(this);
+
+
+      $.ajax({
+          type:'POST',
+          url: base_url+"/suppliers",
+          data: formData,
+          cache:false,
+          contentType: false,
+          processData: false,
+          success: (data) => {
+              $('.dropify-preview').css('display','none');
+              $('#supplier_name').val('');
+              $('#supplier_phone').val('');
+              $('#supplier_email').val('');
+              $('#supplier_address').val('');
+              $('#add-new-supplier').modal('hide');
+             toastr.success('Successfully supplier has been added');
+             getSuppliers(base_url);
+          },
+          error: function(data){
+              console.log('Error:', data); 
+          }
+      }); 
+    });
+   
+
 });
 
+function scanPurchaseProduct(base_url,scan_purchase_product)
+{
+    $.ajax({ 
+
+                   url: base_url+"/scan-purchase-product",
+                   type:"POST",
+                   data:{'scan_purchase_product':scan_purchase_product},
+                   dataType:"json",
+                   success:function(response) {
+
+                      if(response.data.length > 0 && response.type == 'array')
+                      {
+                          var html = '';
+                           html +="<ul class='list-group'>"; 
+
+                           $(response.data).each(function(idx,val){
+
+                               html+="<li class='list-group-item select-product mb-2' data-id="+val.id+">"+val.product_name+"</li>";
+
+                           });
+
+                           html+="</ul>";
+
+                           $('.get-product-lists').html(html);
+                      }
+
+                      else if(response.data.length > 0 && response.type == 'cart')
+                      {
+                           $('#purchase-conts').html('');
+
+
+                             $(response.data).each(function(idx,val){
+                                var imgUrl =  val.product.featured_image;
+                                 var table = '<tr id="purchase_cart_'+val.id+'" class="purchase-carts">'+
+                                               '<td width="15"><img class="img-fluid featured-image" src="'+base_url+"/"+val.product.featured_image+'"></td>'+
+                                               '<td width="15">'+val.product.product_name+'</td>'+
+                                               '<td width="10" class="purchase-pro-price purchase_pro_price_'+val.id+'">'+val.product.purchase_price+'</td>'+
+                                               '<td width="10"><input type="number" class="form-control my-cart-qty cart_qty_'+val.id+'" name="cart_qty[]" value="'+val.cart_qty+'" data-id="'+val.id+'"></td>'+
+                                               '<td width="10"><input type="number" name="purchase_product_tax[]" class="form-control product_purchase_tax purchase_product_tax_'+val.id+'" min="0" value="0" data-id="'+val.id+'"></td>'+
+                                               '<td width="15" class="purchase-sub-total purchase_subtotal_'+val.id+'">'+val.product.purchase_price * val.cart_qty+'</td>'+ 
+                                               '<td width="15"><a href="#" class="btn btn-danger btn-sm delete-purchase-cart" data-id="'+val.id+'"><i class="fa fa-trash"></i></a></td>'+
+                                            '</tr>';
+                                  $('#purchase-conts').append(table);
+
+                                  $('.scan-purchase-product').val('');
+
+                                  $('.get-product-lists').html('');
+
+                                  $('.scan-purchase-product').focus();
+
+                                  purchaseSubtotal();
+                             });
+
+                             $('.scan-purchase-product').focus();
+
+                      }
+                      
+                      else
+                      {
+                           toastr.error('No data found');
+                      }
+
+                   },
+                          
+              }); 
+}
+
+function purchaseSubtotal()
+{   
+  var purchaseSubtotal = 0;
+  var float_purchase_discount = parseFloat($('.purchase-discount').val());
+    $('.purchase-sub-total').each(function(idx,val){
+        purchaseSubtotal += parseFloat($(this).html()); 
+    });
+    var get_cal_purchase = purchaseSubtotal - (float_purchase_discount/100)*purchaseSubtotal;
+   $('.purchase-subtotal').val(purchaseSubtotal.toFixed(2));
+   $('.purchase-total').val(get_cal_purchase.toFixed(2));
+
+}
+
+function getSuppliers(base_url)
+{
+     $.ajax({ 
+
+                   url: base_url+"/get-suppliers",
+                   type:"GET",
+                   dataType:"json",
+                   success:function(response) {
+  
+                    $('#supplier_id').html('');
+                        $(response.data).each(function(idx,value){
+
+                            var options = '<option value="'+value.id+'">'+value.supplier_name+"-"+value.supplier_phone+"-"+value.supplier_email+"-"+value.supplier_address+'</option>';
+
+                            console.log(value);
+
+                            $('#supplier_id').append(options);
+                        });
+                   },
+                          
+              }); 
+}

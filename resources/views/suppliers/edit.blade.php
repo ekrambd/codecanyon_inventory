@@ -32,7 +32,7 @@
                 <div class="card-body">
 
                 <div class="row">
-                  <div class="col-md-6">
+                  <div class="col-md-4">
                   	<div class="form-group">
 		                  <label for="supplier_name">Supplier Name <span class="required">*</span></label>
 		                  <input type="text" name="supplier_name" class="form-control" id="supplier_name" placeholder="Supplier Name" value="{{old('supplier_name',$supplier->supplier_name)}}" required="">
@@ -44,7 +44,7 @@
                   </div>
 
 
-                  <div class="col-md-6">
+                  <div class="col-md-4">
                   	<div class="form-group">
 		                  <label for="supplier_phone">Supplier Phone <span class="required">*</span></label>
 		                  <input type="number" name="supplier_phone" class="form-control" id="supplier_phone" placeholder="Supplier Phone" value="{{old('supplier_phone',$supplier->supplier_phone)}}" required="">
@@ -56,7 +56,7 @@
                   </div>
 
 
-                  <div class="col-md-6">
+                  <div class="col-md-4">
                   	<div class="form-group">
 		                  <label for="supplier_email">Supplier Email <span class="required">*</span></label>
 		                  <input type="email" name="supplier_email" class="form-control" id="supplier_email" placeholder="Supplier Email" value="{{old('supplier_email',$supplier->supplier_email)}}" required="">
@@ -67,15 +67,16 @@
 		               </div>
                   </div>
 
-                  <div class="col-md-6">
-                  	<div class="form-group">
-		                  <label for="supplier_address">Supplier Address <span class="required">*</span></label>
-		                  <input type="text" name="supplier_address" class="form-control" id="supplier_address" placeholder="Supplier Address" value="{{old('supplier_address',$supplier->supplier_address)}}"  required="">
-		                  @error('supplier_address')
-				                 <span class="alert alert-danger">{{ $message }}</span>
-		                  @enderror 
-		                     
-		               </div>
+                  <div class="col-md-12">
+                    <div class="form-group">
+                      <label for="supplier_address">Supplier Address <span class="required">*</span></label>
+                      
+                      <textarea class="form-control" rows="5" cols="20" name="supplier_address" id="supplier_address" placeholder="Supplier Address" required="">{{old('supplier_address',$supplier->supplier_address)}}</textarea>
+                      @error('supplier_address')
+                         <span class="alert alert-danger">{{ $message }}</span>
+                      @enderror 
+                         
+                   </div>
                   </div>
                  
 

@@ -23,7 +23,7 @@ return new class extends Migration
             $table->biginteger('purchase_price');
             $table->biginteger('sale_price');
             $table->biginteger('product_stock');
-            $table->biginteger('stock_limit')->nullable();
+            $table->biginteger('stock_limit');
             $table->text('product_description');
             $table->string('featured_image');
             $table->timestamps();

@@ -193,6 +193,57 @@
              
             </ul>
           </li>
+
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-users"></i>
+              <p>
+                Suppliers
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{{route('suppliers.create')}}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Add Supplier</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{route('suppliers.index')}}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>All Supplier</p>
+                </a>
+              </li>
+             
+            </ul>
+          </li>
+
+
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-list"></i>
+              <p>
+                Warehouse
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{{route('warehouses.create')}}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Add Warehouse</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{{route('warehouses.index')}}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>All Warehouse</p>
+                </a>
+              </li>
+             
+            </ul>
+          </li>
           
 
           <li class="nav-item">
@@ -222,29 +273,14 @@
 
 
           <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-users"></i>
+            <a href="{{url('/purchase-product')}}" class="nav-link">
+              <i class="nav-icon fas fa-th"></i>
               <p>
-                Suppliers
-                <i class="fas fa-angle-left right"></i>
+                Purchase Product
               </p>
             </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="{{route('suppliers.create')}}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Add Supplier</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="{{route('suppliers.index')}}" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>All Supplier</p>
-                </a>
-              </li>
-             
-            </ul>
           </li>
+
 
 
           <li class="nav-item">
